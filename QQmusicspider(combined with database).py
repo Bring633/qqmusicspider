@@ -10,6 +10,7 @@ import socket
 import json
 import re
 import pymysql
+
 #%%
 #初始化数据库
 
@@ -49,43 +50,6 @@ def web_scrath(url,headers = headers,method = 'get',auth = None,cookies = None):
             if isinstance(ure.reason,socket.timeout):
                 print('TIME OUT')
     return webInitialCrap
-
-# In[starting analysis1.0]已经废弃
-    
-#这里我一开始是直接打开qq音乐的网页去爬取数据的，播放某首歌时，它会生成一个播放界面来播放。
-#我在播放界面终端找到了音乐源的链接，但是并没有在播放器的界面的元素界面中找到。
-#而且，直接在qq音乐的界面中，它并不能直接链接播放器的界面。
-#种种迹象表明，这个方向好像行不通
-#所以我上cdsn上找了找，发现都是一些过时的方法，都封了。调整了下日期，终于找到了一篇文章提供了另外的思路。
-
-def craps_contents_from_singerlist(data):
-    singer = data.find_all(attrs = {'class':'data__name_txt js_index'})[0].string #使用bs库来匹配节点的属性，并转化成字符串
-
-    songNames1 = []
-    songNames = data.find_all(attrs = {'class':'songlist__songname_txt'})
-    for i in songNames:
-        songNames1.append(i.string)
-    
-    songAlums = data.find_all(attrs = {'class':'songlist__album'})
-    songAlums1 = []
-    for i in songAlums:
-        i = i.a
-        songAlums1.append(i.string)
-
-    songTimes = data.find_all(attrs = {'class':'songlist__time'})
-    songTimes1 = []
-    for i in songTimes:
-        songTimes1.append(i.string)
-        
-    dataToAdd = [songNames1,songAlums1,songTimes1]
-    dataConcat = []
-
-    for i in range(len(songTimes1)):
-        dataConcat.append([singer])
-        for j in dataToAdd:
-            dataConcat[i].append(j[i])
-    return dataConcat
-
 
 
 # In[定义清理返回的页面的内容函数]
@@ -160,7 +124,7 @@ def music_download(songMid,i,uin,guid):
 
     data = web_scrath(musicDownLoadLink)
     #师兄师姐注意更改路径！！！！
-    name = r"C:\Users\MSI-NB\Desktop\musicdownload\{}{}{}.mp3".format(songData[i][1],songData[i][2],songData[i][0])#设置保存的路径和文件名
+    name = r"./musicdownload/{}{}{}.mp3".format(songData[i][1],songData[i][2],songData[i][0])#设置保存的路径和文件名
     
 #检查文件命名
 
@@ -231,8 +195,8 @@ def musicLove():
     else:
         pass
         
-    print('程序执行完毕，祝君生活愉快，我们下次再见')
-    #%%
+    print('程序执行完毕')
+#%%
 musicLove()
 
 

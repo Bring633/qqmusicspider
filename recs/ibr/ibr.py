@@ -9,29 +9,13 @@ import pandas as pd
 import random
 import json
 
-# In[read data in]
-#师兄师姐注意修改路径！！！！
 
-data = pd.read_csv(r'C:\Users\MSI-NB\Desktop\研发\recs\ibr\dataForTrain1.csv',encoding = 'utf8')
-
-data.drop('Unnamed: 0',axis = 1,inplace = True)
-data['likes'] = 1
-
-dataForTest = pd.read_csv(r'C:\Users\MSI-NB\Desktop\研发\recs\ibr\dataForTest1.csv',encoding = 'utf8')
-dataForTest['likes'] = 1
-
-#对数据的要求，数据需要转成DataFrame的形式并且以用户为index，columns是所有用户喜欢的singer，values是用户对singer是否喜欢，1为喜欢，0为不喜欢
-# In[Transform data]
-
-dataTrans = pd.pivot_table(data,index = 'userid',columns = 'singer',values = 'likes')#以userid为index，singer为columns
-dataForTest = pd.pivot_table(dataForTest,columns = 'userid',index = 'singer',values = 'likes')
-
-# In[define variable]
+#In[define variable]
 global simDict
 simDict = {}
 global simListLow
 simListLow =[]
-# In[finding similarity]
+#In[finding similarity]
 
 def finding_sim(df,singer,num = 2000):
     if singer not in simListLow:
@@ -64,7 +48,7 @@ def finding_sim(df,singer,num = 2000):
     else:
         pass
     
-# In[recommandations]
+#In[recommandations]
 
 global id
 
@@ -86,7 +70,7 @@ def Recommandations(df,id = id):
         if i in simDict:
             recommandList[i] = simDict[i]
         elif i in simListLow:
-            print(i+'与其它歌相关度过低')
+            print(i+'在训练样本中过于稀少,故不予推荐')
 
             
     #从推荐的列表中随机抽取歌手来推荐
@@ -110,7 +94,7 @@ def Recommandations(df,id = id):
         recommandSingerList = list(recommandList[i][1].keys())
         print("根据您喜欢{0}，为您推荐{1}".format(recommandList[i][0],recommandSingerList))
     
-# In[evaluations]
+#In[evaluations]
         
 def Evaluations(dataTest,id = id):
     
@@ -148,8 +132,78 @@ def Evaluations(dataTest,id = id):
         
         
         return Precision,Recall
+
+
+#2021.10.19新增
+
+def read_simDict():
+    #simDictLow
+    file2 = open(r'./similarityLow.txt','r+',encoding = 'utf8')
+
+    list1 = file2.readlines()#读完一次后，文件指针会放到文件的末尾，再次读取为空
+    list2 = []#即是simdictlow
+
+    for i in list1:
+        i = i.strip()#注意要加i=
+        list2.append(i)
+
+    #simDict
+
+    file1 = open(r'./similarity.txt','r+',encoding = 'utf8')
+
+    dict1=file1.readlines()
+    dict1 = json.loads(dict1[0])
+    global simDict
+    simDict = dict(dict1)
+    
+    return None
+
+def readinput():
+    
+    singer = []
+    
+    single_singer = input("please input singer's name(q denotes for ending)")
+    
+    while single_singer!='q':
+        singer.append(single_singer)
+        single_singer = input("please input singer's name(q denotes for ending)")
+
+    return pd.DataFrame(columns = singer,index = [0]).fillna(1)
         
-# In[caculate evaluations]
+        
+    
+def main():
+    
+    read_simDict()
+    like_singer = readinput()
+    Recommandations(like_singer,0)
+    
+if __name__=='__main__':
+    
+    main()
+    
+    
+
+
+
+"""
+# In[read data in]
+
+data = pd.read_csv(r'./dataForTrain1.csv',encoding = 'utf8')
+
+data.drop('Unnamed: 0',axis = 1,inplace = True)
+data['likes'] = 1
+
+dataForTest = pd.read_csv(r'./dataForTest1.csv',encoding = 'utf8')
+dataForTest['likes'] = 1
+
+#对数据的要求，数据需要转成DataFrame的形式并且以用户为index，columns是所有用户喜欢的singer，values是用户对singer是否喜欢，1为喜欢，0为不喜欢
+#In[Transform data]
+
+dataTrans = pd.pivot_table(data,index = 'userid',columns = 'singer',values = 'likes')#以userid为index，singer为columns
+dataForTest = pd.pivot_table(dataForTest,columns = 'userid',index = 'singer',values = 'likes')
+
+#In[caculate evaluations]
 global evaDict#创立全局变量，储存precision，recall值
 evaDict = {}
 
@@ -161,7 +215,7 @@ for i in dataTrans.index[:2000]:#计算前20个用户的precison和recall值
     print(count)
     count+=1
     evaDict[id] = Precision,Recall#赋予变量值
-#%%
+#
 id=[]
 precision=[]
 recall = []
@@ -171,7 +225,7 @@ for i in evaDict.keys():
     precision.append(evaDict[i][0])
     recall.append(evaDict[i][1])
 
-# In[创建一个Dataframe来计算值]
+#In[创建一个Dataframe来计算值]
     
 eva = pd.DataFrame({'Precision':precision,'Recall':recall},index = id)
 eva = eva.replace(0,value = np.nan).dropna()
@@ -180,11 +234,11 @@ PRECISION = eva["Precision"].mean()
 RECALL = eva['Recall'].mean()
 COVERAGE = len(simDict)/len(dataTrans.columns)
 
-# In[输出歌的相似度]
-
-#师兄师姐注意修改路径！！！！
-file1 = open(r'C:\Users\MSI-NB\Desktop\研发\recs\ibr\similarity.txt','w+',encoding = 'utf8')
-file2 = open(r'C:\Users\MSI-NB\Desktop\研发\recs\ibr\similarityLow.txt','w+',encoding = 'utf8')
+"""
+#In[输出歌的相似度]
+"""
+file1 = open(r'./similarity.txt','w+',encoding = 'utf8')
+file2 = open(r'./similarityLow.txt','w+',encoding = 'utf8')
 
 #file1
 sim = json.dumps(simDict)#转换成json格式
@@ -199,10 +253,9 @@ file1.close()
 file2.close()
 
 # In[读取文件并转化成list]# In[读取文件并转化为dict]
-#师兄师姐注意修改路径！！！！
 
 #simDictLow
-file2 = open(r'C:\Users\MSI-NB\Desktop\研发\recs\ibr\similarityLow.txt','r+',encoding = 'utf8')
+file2 = open(r'./similarityLow.txt','r+',encoding = 'utf8')
 
 list1 = file2.readlines()#读完一次后，文件指针会放到文件的末尾，再次读取为空
 list2 = []#即是simdictlow
@@ -213,8 +266,9 @@ for i in list1:
 
 #simDict
 
-file1 = open(r'C:\Users\MSI-NB\Desktop\研发\recs\ibr\similarity.txt','r+',encoding = 'utf8')
+file1 = open(r'./similarity.txt','r+',encoding = 'utf8')
 
 dict1=file1.readlines()
 dict1 = json.loads(dict1[0])
 simDict = dict(dict1)
+"""

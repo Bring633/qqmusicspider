@@ -5,17 +5,8 @@ Created on Sun Apr  5 09:42:58 2020
 @author: MSI-NB
 """
 
-import pandas as pd
-#师兄师姐注意修改路径！！！
-data = pd.read_csv(r'C:\Users\MSI-NB\Desktop\研发一轮\recs\ubr\dataForTrain.csv',encoding = 'utf8',index_col = 'singer')
-dataForTest = pd.read_csv(r'C:\Users\MSI-NB\Desktop\研发一轮\recs\ubr\dataForTest.csv',encoding = 'utf8',index_col = 'singer')
-
-data.drop(['Unnamed: 0'],axis =1,inplace = True)
-data['likesinger'] =1
-#建立一个table index 是用户 columns是singer
-
-#对数据的要求，数据需要转成DataFrame的形式，并且以用户为index，columns是所有用户喜欢的singer，values是用户对singer是否喜欢，1为喜欢，0为不喜欢
-# In[找到两个id之间的相似度]
+import pandas as pd 
+#In[找到两个id之间的相似度]
 
 
 def finding_similarity(df1,df2):#输入为某个serie
@@ -31,7 +22,7 @@ def finding_similarity(df1,df2):#输入为某个serie
         #print("there isn't similarity between two series")此时两列没有相似的元素
         pass
     
-# In[找到一个在table中id与剩余的id的相似度]
+#In[找到一个在table中id与剩余的id的相似度]
 
 def finding_sim_with_otherid(df,baseid,num):#num是范围
     
@@ -60,7 +51,7 @@ def finding_sim_with_otherid(df,baseid,num):#num是范围
     except:
         pass
     
-# In[返回推荐]
+#In[返回推荐]
 
 def recommandations(df,dict1,listBaseid):#输入先前确定的相关最高的字典
     global recommandation
@@ -80,12 +71,12 @@ def recommandations(df,dict1,listBaseid):#输入先前确定的相关最高的�
                     pass
         else:
             pass
-    print(recommandation)
+    print('为您推荐'+recommandation)
     if list(dict1.values())[0] <0.35:
-        print('您的风格过于独特，暂无推荐')
+        print('您喜欢的歌手较为小众，暂无推荐')
     return recommandation
 
-# In[整合函数]
+#In[整合函数]
     
 def song_recommandations(df,id,num=2000):
     global recommandation
@@ -93,9 +84,65 @@ def song_recommandations(df,id,num=2000):
     finding_sim_with_otherid(df,id,num)
     recommandation = recommandations(df,dict1,id)
     print('Completed')
+
+def readData():
+    data = pd.read_csv(r'./dataForTrain.csv',encoding = 'utf8',index_col = 'singer')
+    try:
+        data.drop(['Unnamed: 0'],axis =1,inplace = True)
+    except Exception as e:
+        pass
+    data['likesinger'] =1
+    return data
+
+def readinput(data):
     
+    singer = []
     
+    single_singer = input("please input singer's name(q denotes for ending)")
+    
+    while single_singer!='q':
+        singer.append(single_singer)
+        single_singer = input("please input singer's name(q denotes for ending)")
+
+    df = pd.DataFrame(index = data.index,columns = ['user'])
+
+    for i in singer:
+        try:
+            data.loc[i,:]
+            df.loc[i,'user'] = 1
+        except Exception as e:
+            print("该歌手未收录,推荐失败")
+            return None,1
+    
+    return pd.concat([df,data],axis = 1),0
+        
+
+def main():
+    
+    data = readData()
+    data_with_input,flags = readinput(data)
+    if flags ==0:
+        song_recommandations(data_with_input,'user')
+    else:
+        pass
+    
+if __name__ == '__main__':
+    main()
+
+"""
+data = pd.read_csv(r'./dataForTrain.csv',encoding = 'utf8',index_col = 'singer')
+dataForTest = pd.read_csv(r'./dataForTest.csv',encoding = 'utf8',index_col = 'singer')
+try:
+    data.drop(['Unnamed: 0'],axis =1,inplace = True)
+except Exception as e:
+    pass
+data['likesinger'] =1
+#建立一个table index 是用户 columns是singer
+
+#对数据的要求，数据需要转成DataFrame的形式，并且以用户为index，columns是所有用户喜欢的singer，values是用户对singer是否喜欢，1为喜欢，0为不喜欢
+
 # In[评价函数]
+
     
 global id
 id = '001a11b6b9a82c4bec0b1e1e472067a8d14feab7'
@@ -126,7 +173,7 @@ def Evaluations(dftest,id,recommandationList):
     
     return precision,recall
 
-# In[Create dataset and find PRECISION,RECALL and CONVERAGE]
+#In[Create dataset and find PRECISION,RECALL and CONVERAGE]
     
 listPre = []
 listRecal =[]
@@ -147,7 +194,7 @@ PRECISION = dataSet['Precision'].mean()
 RECALL = dataSet['Recall'].mean()
 COVERAGE = recommandLen/len(data.index)
     
-    
+"""  
     
     
     
