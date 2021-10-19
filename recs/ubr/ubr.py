@@ -71,7 +71,7 @@ def recommandations(df,dict1,listBaseid):#输入先前确定的相关最高的�
                     pass
         else:
             pass
-    print('为您推荐'+recommandation)
+    print('为您推荐',recommandation)
     if list(dict1.values())[0] <0.35:
         print('您喜欢的歌手较为小众，暂无推荐')
     return recommandation
